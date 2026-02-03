@@ -1,6 +1,7 @@
 import asyncio
-from app.db.database import engine, Base
-from app.db import models  # noqa
+
+from app.db.database import engine
+from app.db.models import Base
 
 
 async def init_models():
