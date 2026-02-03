@@ -20,13 +20,17 @@ async def start_bot():
 
     dp = Dispatcher()
 
-    # подключаем все handlers
     dp.include_router(start.router)
     dp.include_router(details.router)
     dp.include_router(jobs.router)
     dp.include_router(apply.router)
 
     print("🤖 Bot started")
+
+    # 🔥 ЗАПУСКАЕМ ФОНОВЫЙ СБОР
+    from app.services.job_collector import job_collector_loop
+    asyncio.create_task(job_collector_loop(bot))
+
     await dp.start_polling(bot)
 
 # =========================
