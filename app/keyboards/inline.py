@@ -37,3 +37,17 @@ def channel_job_keyboard(bot_username: str, job_id: int):
             )
         ]
     ])
+
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from app.services.payments import PACKAGES
+
+def packages_keyboard(job_id: int):
+    buttons = []
+    for code, p in PACKAGES.items():
+        buttons.append([
+            InlineKeyboardButton(
+                text=f"{p['title']} — {p['price']} ⭐",
+                callback_data=f"buy:{code}:{job_id}"
+            )
+        ])
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
