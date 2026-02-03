@@ -7,10 +7,11 @@ from aiogram.enums import ParseMode
 from aiohttp import web
 
 from app.config import AZUR_JOB_BOT_TOKEN
-from app.handlers import start, details, jobs
+from app.handlers import start, details, jobs, apply
 
-
-# ---------- TELEGRAM BOT ----------
+# =========================
+# TELEGRAM BOT
+# =========================
 async def start_bot():
     bot = Bot(
         token=AZUR_JOB_BOT_TOKEN,
@@ -18,30 +19,29 @@ async def start_bot():
     )
 
     dp = Dispatcher()
+
+    # подключаем все handlers
     dp.include_router(start.router)
     dp.include_router(details.router)
     dp.include_router(jobs.router)
+    dp.include_router(apply.router)
 
     print("🤖 Bot started")
     await dp.start_polling(bot)
 
-
-# ---------- WEB SERVER ----------
+# =========================
+# WEB SERVER (для Render)
+# =========================
 async def healthcheck(request):
     return web.Response(text="OK")
 
 
-async def create_web_app():
+async def start_web_server():
     app = web.Application()
     app.router.add_get("/", healthcheck)
-    return app
 
-
-async def main():
-    # 1️⃣ СНАЧАЛА поднимаем web-сервер
     port = int(os.getenv("PORT", "10000"))
 
-    app = await create_web_app()
     runner = web.AppRunner(app)
     await runner.setup()
 
@@ -50,7 +50,14 @@ async def main():
 
     print(f"🌐 Web server started on port {port}")
 
-    # 2️⃣ ПОТОМ запускаем бота в фоне
+# =========================
+# MAIN
+# =========================
+async def main():
+    # 1️⃣ сначала открываем порт (Render!)
+    await start_web_server()
+
+    # 2️⃣ потом запускаем бота в фоне
     asyncio.create_task(start_bot())
 
     # 3️⃣ держим процесс живым
