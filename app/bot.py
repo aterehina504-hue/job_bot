@@ -1,73 +1,78 @@
 import asyncio
 import os
 
+from aiohttp import web
+
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
-
-from aiohttp import web
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 
 from app.config import AZUR_JOB_BOT_TOKEN
 from app.handlers import start, details, jobs, apply
 
-# =========================
-# TELEGRAM BOT
-# =========================
-async def start_bot():
-    bot = Bot(
-        token=AZUR_JOB_BOT_TOKEN,
-        parse_mode=ParseMode.HTML
-    )
 
-    dp = Dispatcher()
+WEBHOOK_PATH = "/webhook"
+WEBHOOK_URL = os.getenv("WEBHOOK_BASE_URL") + WEBHOOK_PATH
 
-    dp.include_router(start.router)
-    dp.include_router(details.router)
-    dp.include_router(jobs.router)
-    dp.include_router(apply.router)
-
-    print("🤖 Bot started")
-
-    # 🔥 ЗАПУСКАЕМ ФОНОВЫЙ СБОР
-    from app.services.job_collector import job_collector_loop
-    asyncio.create_task(job_collector_loop(bot))
-
-    await dp.start_polling(bot)
 
 # =========================
-# WEB SERVER (для Render)
+# BOT & DISPATCHER
+# =========================
+bot = Bot(
+    token=AZUR_JOB_BOT_TOKEN,
+    parse_mode=ParseMode.HTML
+)
+
+dp = Dispatcher()
+dp.include_router(start.router)
+dp.include_router(details.router)
+dp.include_router(jobs.router)
+dp.include_router(apply.router)
+
+
+# =========================
+# WEB SERVER
 # =========================
 async def healthcheck(request):
     return web.Response(text="OK")
 
 
-async def start_web_server():
+async def on_startup(app):
+    # ставим webhook
+    await bot.set_webhook(WEBHOOK_URL)
+    print(f"🔗 Webhook set to {WEBHOOK_URL}")
+
+    # запускаем job collector
+    from app.services.job_collector import job_collector_loop
+    asyncio.create_task(job_collector_loop(bot))
+
+
+async def on_shutdown(app):
+    await bot.delete_webhook()
+
+
+def create_app():
     app = web.Application()
+
+    # healthcheck (для Render)
     app.router.add_get("/", healthcheck)
 
-    port = int(os.getenv("PORT", "10000"))
+    # webhook endpoint
+    SimpleRequestHandler(
+        dispatcher=dp,
+        bot=bot
+    ).register(app, path=WEBHOOK_PATH)
 
-    runner = web.AppRunner(app)
-    await runner.setup()
+    app.on_startup.append(on_startup)
+    app.on_shutdown.append(on_shutdown)
 
-    site = web.TCPSite(runner, "0.0.0.0", port)
-    await site.start()
+    setup_application(app, dp, bot=bot)
+    return app
 
-    print(f"🌐 Web server started on port {port}")
 
 # =========================
 # MAIN
 # =========================
-async def main():
-    # 1️⃣ сначала открываем порт (Render!)
-    await start_web_server()
-
-    # 2️⃣ потом запускаем бота в фоне
-    asyncio.create_task(start_bot())
-
-    # 3️⃣ держим процесс живым
-    while True:
-        await asyncio.sleep(3600)
-
-
 if __name__ == "__main__":
-    asyncio.run(main())
+    port = int(os.getenv("PORT", 10000))
+    web.run_app(create_app(), host="0.0.0.0", port=port)
