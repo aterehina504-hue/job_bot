@@ -5,6 +5,7 @@ from aiohttp import web
 
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
+from aiogram.client.default import DefaultBotProperties
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 
 from app.config import AZUR_JOB_BOT_TOKEN
@@ -12,7 +13,8 @@ from app.handlers import start, details, jobs, apply
 
 
 WEBHOOK_PATH = "/webhook"
-WEBHOOK_URL = os.getenv("WEBHOOK_BASE_URL") + WEBHOOK_PATH
+BASE_URL = os.getenv("WEBHOOK_BASE_URL").rstrip("/")
+WEBHOOK_URL = BASE_URL + WEBHOOK_PATH
 
 
 # =========================
@@ -20,7 +22,7 @@ WEBHOOK_URL = os.getenv("WEBHOOK_BASE_URL") + WEBHOOK_PATH
 # =========================
 bot = Bot(
     token=AZUR_JOB_BOT_TOKEN,
-    parse_mode=ParseMode.HTML
+    default=DefaultBotProperties(parse_mode=ParseMode.HTML)
 )
 
 dp = Dispatcher()
@@ -38,13 +40,12 @@ async def healthcheck(request):
 
 
 async def on_startup(app):
-    # ставим webhook
     await bot.set_webhook(WEBHOOK_URL)
     print(f"🔗 Webhook set to {WEBHOOK_URL}")
 
-    # запускаем job collector
     from app.services.job_collector import job_collector_loop
     asyncio.create_task(job_collector_loop(bot))
+    print("🌀 Job collector started")
 
 
 async def on_shutdown(app):
@@ -54,7 +55,7 @@ async def on_shutdown(app):
 def create_app():
     app = web.Application()
 
-    # healthcheck (для Render)
+    # healthcheck — ОБЯЗАТЕЛЬНО
     app.router.add_get("/", healthcheck)
 
     # webhook endpoint
@@ -75,4 +76,5 @@ def create_app():
 # =========================
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 10000))
+    print(f"🌐 Starting web server on port {port}")
     web.run_app(create_app(), host="0.0.0.0", port=port)
