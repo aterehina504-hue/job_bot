@@ -3,6 +3,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 
 from app.config import AZUR_JOB_BOT_TOKEN
+from app.handlers import start
 
 
 async def main():
@@ -13,7 +14,8 @@ async def main():
 
     dp = Dispatcher()
 
-    # handlers будем подключать на следующих шагах
+    # подключаем handlers
+    dp.include_router(start.router)
 
     print("🤖 Bot started")
 
