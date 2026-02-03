@@ -9,6 +9,14 @@ SOURCE_CHANNELS = [
     "cotedazurjobs",
     "jobsfranceru",
     "nicecannesjobs",
+    "rabota_france",
+    "rabota_nice",
+    "rabota_cannes",
+    "france_job_ru",
+    "rabota_monaco",
+    "job_cotedazur",
+    "nice_job_ru",
+    "monaco_job"
 ]
 
 
