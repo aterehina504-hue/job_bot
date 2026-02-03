@@ -5,9 +5,6 @@ from aiogram.enums import ParseMode
 from app.config import AZUR_JOB_BOT_TOKEN
 from app.handlers import start, details, jobs
 
-dp.include_router(start.router)
-dp.include_router(details.router)
-dp.include_router(jobs.router)
 
 async def main():
     bot = Bot(
@@ -17,8 +14,10 @@ async def main():
 
     dp = Dispatcher()
 
-    # подключаем handlers
+    # ✅ ВСЕ routers подключаются ТОЛЬКО здесь
     dp.include_router(start.router)
+    dp.include_router(details.router)
+    dp.include_router(jobs.router)
 
     print("🤖 Bot started")
 
