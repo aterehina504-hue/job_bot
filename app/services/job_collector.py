@@ -6,34 +6,22 @@ from app.services.parser import collect_raw_jobs
 from app.services.job_pipeline import process_raw_job_and_publish
 
 
-async def job_collector_loop(
-    bot: Bot,
-    interval: int = 1800  # 30 минут
-):
-    """
-    Фоновый сбор вакансий:
-    Telegram → ИИ → БД → Канал
-    """
-    bot_username = (await bot.get_me()).username
-
-    print("🌀 Job collector started")
+async def job_collector_loop(bot):
+    print("🌀 Job collector loop running")
 
     while True:
         try:
-            raw_jobs = []
-            raw_jobs += await collect_raw_jobs()        # Telegram
-            raw_jobs += collect_site_jobs()              # сайты
             raw_jobs = await collect_raw_jobs()
+            print(f"📥 Raw jobs collected: {len(raw_jobs)}")
 
             for raw in raw_jobs:
                 await process_raw_job_and_publish(
-                    bot=bot,
-                    raw_text=raw["text"],
-                    bot_username=bot_username
+                    bot,
+                    raw["text"],
+                    bot.username
                 )
 
         except Exception as e:
             print(f"❌ Job collector error: {e}")
 
-        await asyncio.sleep(interval)
-
+        await asyncio.sleep(1800)  # 30 минут
