@@ -39,7 +39,11 @@ class UserPayment(Base):
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-from sqlalchemy import Integer, BigInteger
+from sqlalchemy import Column, Integer, BigInteger
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+
 
 class UserBalance(Base):
     __tablename__ = "user_balances"
