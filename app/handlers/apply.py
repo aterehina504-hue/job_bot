@@ -33,8 +33,8 @@ async def apply_handler(callback: CallbackQuery):
             "• готовый к отправке"
         ),
         payload=str(payment.id),
-        provider_token="",  # ⚠️ для Stars всегда пусто
-        currency="XTR",     # ⭐ Telegram Stars
+        provider_token="",  
+        currency="XTR",     
         prices=[
             LabeledPrice(
                 label="1 отклик",
@@ -48,3 +48,19 @@ async def apply_handler(callback: CallbackQuery):
 @router.pre_checkout_query()
 async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
     await pre_checkout_query.answer(ok=True)
+
+@router.message(F.successful_payment)
+async def successful_payment_handler(message: Message):
+    payment_id = int(message.successful_payment.invoice_payload)
+
+    async with AsyncSessionLocal() as session:
+        payment = await session.get(UserPayment, payment_id)
+
+        if payment:
+            payment.is_used = True
+            await session.commit()
+
+    await message.answer(
+        "✅ Оплата прошла успешно!\n\n"
+        "Теперь я задам вам несколько вопросов и подготовлю персональный отклик 🤖"
+    )
