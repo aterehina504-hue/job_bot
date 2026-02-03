@@ -20,6 +20,9 @@ async def job_collector_loop(
 
     while True:
         try:
+            raw_jobs = []
+            raw_jobs += await collect_raw_jobs()        # Telegram
+            raw_jobs += collect_site_jobs()              # сайты
             raw_jobs = await collect_raw_jobs()
 
             for raw in raw_jobs:
@@ -33,3 +36,4 @@ async def job_collector_loop(
             print(f"❌ Job collector error: {e}")
 
         await asyncio.sleep(interval)
+
