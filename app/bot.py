@@ -42,6 +42,21 @@ from app.db.database import engine
 from app.db.models import Base
 
 async def on_startup(app):
+    # 🔥 ИНИЦИАЛИЗАЦИЯ БД (ОДИН РАЗ)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    print("🗄️ Database initialized")
+
+    # webhook
+    await bot.set_webhook(WEBHOOK_URL)
+    print(f"🔗 Webhook set to {WEBHOOK_URL}")
+
+    # job collector
+    from app.services.job_collector import job_collector_loop
+    asyncio.create_task(job_collector_loop(bot))
+    print("🌀 Job collector started")
+
+async def on_startup(app):
     await bot.set_webhook(WEBHOOK_URL)
     print(f"🔗 Webhook set to {WEBHOOK_URL}")
 
