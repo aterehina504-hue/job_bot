@@ -12,3 +12,6 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Database
 DATABASE_URL = os.getenv("DATABASE_URL")
+
+TG_API_ID = int(os.getenv("TG_API_ID", "0"))
+TG_API_HASH = os.getenv("TG_API_HASH")
