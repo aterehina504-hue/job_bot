@@ -1,5 +1,5 @@
-from app.db.database import engine
-from app.db.database import Base
+from app.db.database import engine, Base
+import app.db.models 
 
 import asyncio
 import os
