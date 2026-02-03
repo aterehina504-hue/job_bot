@@ -24,3 +24,17 @@ class Job(Base):
     is_active = Column(Boolean, default=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+from sqlalchemy import BigInteger
+
+
+class UserPayment(Base):
+    __tablename__ = "user_payments"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(BigInteger, nullable=False)
+    job_id = Column(Integer, nullable=False)
+
+    is_used = Column(Boolean, default=False)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
