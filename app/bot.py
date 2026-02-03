@@ -38,6 +38,8 @@ dp.include_router(apply.router)
 async def healthcheck(request):
     return web.Response(text="OK")
 
+from app.db.database import engine
+from app.db.models import Base
 
 async def on_startup(app):
     await bot.set_webhook(WEBHOOK_URL)
