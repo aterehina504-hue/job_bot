@@ -38,3 +38,11 @@ class UserPayment(Base):
     is_used = Column(Boolean, default=False)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+from sqlalchemy import Integer, BigInteger
+
+class UserBalance(Base):
+    __tablename__ = "user_balances"
+
+    user_id = Column(BigInteger, primary_key=True)
+    credits = Column(Integer, default=0)
