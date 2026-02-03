@@ -35,6 +35,7 @@ dp.include_router(jobs.router)
 dp.include_router(apply.router)
 
 async def init_db():
+    print("🧪 Tables before:", Base.metadata.tables.keys())
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     print("🗄️ Database initialized")
@@ -49,7 +50,7 @@ from app.db.database import engine
 from app.db.models import Base
 
 async def on_startup(app):
-    await init_db()   # ← ОБЯЗАТЕЛЬНО ПЕРВЫМ
+    await init_db()
 
     await bot.set_webhook(WEBHOOK_URL)
     print(f"🔗 Webhook set to {WEBHOOK_URL}")
