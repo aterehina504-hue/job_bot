@@ -9,10 +9,15 @@ async def publish_job_to_channel(
     job,
     bot_username: str
 ):
+    """
+    Публикует вакансию в Telegram-канал
+    """
+
     text = (
-        f"{job.title} | {job.city}\n"
-        f"💶 {job.salary or '—'}\n"
-        f"🕒 {job.job_type or '—'}\n\n"
+        f"💼 <b>{job.title}</b>\n"
+        f"📍 {job.city}\n"
+        f"🕒 {job.job_type or '—'}\n"
+        f"💶 {job.salary or '—'}\n\n"
         f"{job.short_description}"
     )
 
