@@ -1,3 +1,9 @@
+from aiogram.fsm.state import StatesGroup, State
+from aiogram.fsm.context import FSMContext
+
+from app.services.ai import generate_application_text
+from app.services.jobs import get_job_by_id
+
 from aiogram import Router, F
 from aiogram.types import CallbackQuery, LabeledPrice, Message, PreCheckoutQuery
 
