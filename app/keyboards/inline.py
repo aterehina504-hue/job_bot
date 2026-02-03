@@ -16,3 +16,24 @@ def job_details_keyboard(job_id: int) -> InlineKeyboardMarkup:
             )
         ]
     ])
+
+from app.config import AZUR_JOB_BOT_TOKEN  # не используется напрямую, просто для импорта
+
+
+def channel_job_keyboard(bot_username: str, job_id: int):
+    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text="🤖 Откликнуться через бота",
+                url=f"https://t.me/AzurJobBot?start=job_{job_id}"
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text="ℹ️ Подробнее о вакансии",
+                callback_data=f"details:{job_id}"
+            )
+        ]
+    ])
